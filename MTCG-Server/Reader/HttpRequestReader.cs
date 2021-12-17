@@ -82,7 +82,16 @@
 
                 #endregion
 
-                return new HttpRequest(path, url, content, contentType, protocolVersion, httpMethod, headers);
+                #region Auth
+
+                IParser<string> authValueParser = new HttpAuthorizationValueParser();
+                string authValue = authValueParser.Parse(headers);
+
+                #endregion
+
+                if (authValue == null)
+                    return new HttpRequest(path, url, content, contentType, protocolVersion, httpMethod, headers);
+                return new HttpRequest(authValue, path, url, content, contentType, protocolVersion, httpMethod, headers);
             }
             catch (SocketException se)
             {

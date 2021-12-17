@@ -14,7 +14,6 @@
             get;
             private set;
         }
-        //public Action<object, object> OnRequestReceived { get; internal set; }
 
         protected abstract void Handle();
     }

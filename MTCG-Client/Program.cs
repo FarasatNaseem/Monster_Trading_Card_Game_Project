@@ -1,12 +1,14 @@
-﻿using System;
+﻿using MTCG_Client.GameSpecific;
+using System;
 
 namespace MTCG_Client
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Game game = new Game();
+            game.Start();
         }
     }
 }

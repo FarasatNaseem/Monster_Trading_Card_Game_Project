@@ -2,6 +2,8 @@
 {
     using System.Collections.Generic;
     using MTCG_Server.Enum;
+    using MTCG_Server.Routing;
+
     public class HttpRequest
     {
         public HttpRequest(string path, string url, string content, string contentType, string version, HttpMethod httpMethod, Dictionary<string, string> headers)
@@ -14,6 +16,13 @@
             this.HttpMethod = httpMethod;
             this.Headers = headers;
         }
+
+        public HttpRequest(string token, string path, string url, string content, string contentType, string version, HttpMethod httpMethod, Dictionary<string, string> headers)
+            : this(path, url, content, contentType, version, httpMethod, headers)
+        {
+            this.Token = token;
+        }
+
         public string Path
         {
             get;
@@ -49,5 +58,7 @@
             get;
             private set;
         }
+        public Route Route { get; set; }
+        public string Token { get; set; }
     }
 }

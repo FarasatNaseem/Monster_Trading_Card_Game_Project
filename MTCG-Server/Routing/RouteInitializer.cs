@@ -14,43 +14,43 @@
             {
                 this.InitializeRegisterRoute(),
                 this.InitializeLoginRoute(),
-                this.InitializeSessionRoute()
+                this.InitializePackagesRoute()
             };
         }
 
         private Route InitializeRegisterRoute()
         {
-            this.controller = new RegisterController();
+            this.controller = new UserController();
 
             return new Route()
             {
                 Callable = this.controller.Control,
-                Url = "/Register",
+                Url = "/users",
                 Method = HttpMethod.POST
             };
         }
 
         private Route InitializeLoginRoute()
         {
-            this.controller = new LoginController();
+            this.controller = new UserController();
 
             return new Route()
             {
                 Callable = this.controller.Control,
-                Url = "/Login",
+                Url = "/sessions",
                 Method = HttpMethod.POST
             };
         }
 
-        private Route InitializeSessionRoute()
+        private Route InitializePackagesRoute()
         {
-            this.controller = new SessionController();
+            this.controller = new CardController();
 
             return new Route()
             {
                 Callable = this.controller.Control,
-                Url = "/Session",
-                Method = HttpMethod.GET
+                Url = "/packages",
+                Method = HttpMethod.POST
             };
         }
     }

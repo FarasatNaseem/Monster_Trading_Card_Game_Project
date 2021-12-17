@@ -1,15 +1,9 @@
-﻿using MTCG_Server.Handler.ClientHandler;
-using MTCG_Server.HttpListenner;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MTCG_Server
+﻿namespace MTCG_Server
 {
+    using System;
+    using MTCG_Server.Handler.ClientHandler;
+    using MTCG_Server.HttpListenner;
+
     public class HttpServer
     {
         private HttpClientWatcher httpClientWatcher;
@@ -33,7 +27,6 @@ namespace MTCG_Server
 
         private void HttpClientWatcherOnClientConnected(object sender, HttpClientWatcherOnClientConnectedEventArgs e)
         {
-            Console.WriteLine($"New client is connected: Ip address is {e.ClientAddress}");
             this.httpClientHandler = new HttpClientHandler(e.Client);
             this.httpClientHandler.Start();
         }

@@ -5,6 +5,7 @@
     using MTCG_Server.Routing;
     using MTCG_Server.Writer;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -21,14 +22,35 @@
         private List<Route> routes;
         public HandlerManager(NetworkStream inputStream, NetworkStream outputStream)
         {
-            this.requestHandler = new HttpRequestHandler(inputStream);
-            this.responseHandler = new HttpResponseHandler(outputStream);
-            this.renderer = new NetworkStreamRenderer();
+            this.InputStream = inputStream;
+            this.OutputStream = outputStream;
             this.initializer = new RouteInitializer();
+        }
+
+        public NetworkStream InputStream
+        {
+            get;
+            private set;
+        }
+
+        public NetworkStream OutputStream
+        {
+            get;
+            private set;
+        }
+
+        private void Release()
+        {
+            this.OutputStream.Flush();
+            this.OutputStream.Close();
+            this.OutputStream = null;
+            this.InputStream.Close();
+            this.InputStream = null;
         }
 
         public void Start()
         {
+            this.requestHandler = new HttpRequestHandler(this.InputStream);
             this.requestHandler.OnRequestReceived += RequestHandlerOnRequestReceived;
             this.routes = this.initializer.Initialize();
             this.requestHandler.Start();
@@ -36,7 +58,17 @@
 
         private void RequestHandlerOnRequestReceived(object sender, HttpRequestHandlerOnRequestReceivedEventArgs e)
         {
-            Console.WriteLine(e.HttpClientRequest.Content);
+            this.responseHandler = new HttpResponseHandler(this.OutputStream, this.routes, e.HttpClientRequest);
+            this.responseHandler.OnResponseReceived += ResponseHandlerOnResponseReceived;
+            this.responseHandler.Start();
+        }
+
+        private void ResponseHandlerOnResponseReceived(object sender, HttpResponseHandlerOnResponseReceivedFoundEventArgs e)
+        {
+
+            this.renderer = new NetworkStreamRenderer();
+            this.renderer.Render(new ArrayList { e.Response, this.OutputStream });
+            this.Release();
         }
     }
 }
