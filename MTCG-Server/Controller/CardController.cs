@@ -1,15 +1,10 @@
-﻿using MTCG_Server.DB;
-using MTCG_Server.Enum;
-using MTCG_Server.Handler.RequestHandler;
-using MTCG_Server.Handler.ResponseHandler;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MTCG_Server.Controller
+﻿namespace MTCG_Server.Controller
 {
+    using MTCG_Server.DB;
+    using MTCG_Server.Enum;
+    using MTCG_Server.Handler.RequestHandler;
+    using MTCG_Server.Handler.ResponseHandler;
+
     public class CardController : IController
     {
         public CardController()
@@ -26,18 +21,76 @@ namespace MTCG_Server.Controller
         {
             return request.Path switch
             {
-                // Create packages
+                // Create packages.
                 "/packages" => this.ControlCreatePackageRequest(request),
+                // Acquire package.
                 "/transactions/packages" => this.ControlAcquirePackageRequest(request),
+                // Get Cards by specific user token.
+                "/cards" => this.ControlGetCardsRequest(request),
                 _ => new HttpResponse()
+            };
+        }
+
+        private HttpResponse ControlGetCardsRequest(HttpRequest request)
+        {
+            string message = this.DbInstance.FetchAllCardOfSpecificUser(request.Token);
+            int code = 0;
+
+            if (message == null)
+            {
+                string content = "Due to some error package can't be acquired";
+                code = ((int)HttpStatusCode.BadRequest);
+
+                message = "{";
+                message += "\n";
+                message += "    \"Content\":";
+                message += $" \"{content}\",";
+                message += "\n";
+                message += "    \"Status\":";
+                message += $" \"{code}\"";
+                message += "\n";
+                message += "}";
+            }
+            else
+            {
+                code = ((int)HttpStatusCode.Ok);
+            }
+
+            return new HttpResponse()
+            {
+                ReasonPhrase = HttpStatusCode.Ok.ToString(),
+                Status = HttpStatusCode.Ok,
+                ContentAsUTF8 = message,
+
+                Path = request.Path
             };
         }
 
         private HttpResponse ControlAcquirePackageRequest(HttpRequest request)
         {
-            bool isCardsAcquired = this.DbInstance.AcquirePackage(request.Token);
+            string content = this.DbInstance.AcquirePackage(request.Token) ? "Package is acquired" : "Due to some error package can't be acquired";
 
-            return null;
+            int code = ((int)HttpStatusCode.Ok);
+
+            string message = "{";
+            message += "\n";
+            message += "    \"Content\":";
+            message += $" \"{content}\",";
+            message += "\n";
+            message += "    \"Status\":";
+            message += $" \"{code}\"";
+            message += "\n";
+            message += "}";
+
+
+            return new HttpResponse()
+            {
+                ReasonPhrase = HttpStatusCode.Ok.ToString(),
+                Status = HttpStatusCode.Ok,
+                ContentAsUTF8 = message,
+
+                Path = request.Path
+            };
         }
 
         private HttpResponse ControlCreatePackageRequest(HttpRequest request)

@@ -1,6 +1,5 @@
 ﻿namespace MTCG_Server.Routing
 {
-    using System;
     using System.Collections.Generic;
     using MTCG_Server.Controller;
     using MTCG_Server.Enum;
@@ -15,7 +14,8 @@
                 this.InitializeRegisterRoute(),
                 this.InitializeLoginRoute(),
                 this.InitializeCreatePackagesRoute(),
-                this.InitializeAcquirePackagesRoute()
+                this.InitializeAcquirePackagesRoute(),
+                this.InitializeGetCardRoute()
             };
         }
 
@@ -64,6 +64,18 @@
                 Callable = this.controller.Control,
                 Url = "/transactions/packages",
                 Method = HttpMethod.POST
+            };
+        }
+
+        private Route InitializeGetCardRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/cards",
+                Method = HttpMethod.GET
             };
         }
     }

@@ -1,32 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
-using Npgsql;
-using NpgsqlTypes;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.Json;
-using System.Xml.Serialization;
-using BCrypt.Net;
-using Newtonsoft.Json;
-
-namespace MTCG_Server.DB
+﻿namespace MTCG_Server.DB
 {
+    using System;
+    using Newtonsoft.Json.Linq;
+    using Npgsql;
+    using System.Collections.Generic;
+    using System.Data;
+    using Newtonsoft.Json;
+
     public class Database
     {
+        // Finished.
         private IDbConnection Connect()
         {
             return new NpgsqlConnection("Host=localhost;Username=root;Password=root;Database=MTCG");
         }
 
-        public bool Register(string userCredentialJsonObject)
+        // Finished.
+        public bool Register(string userSchemaJsonObject)
         {
             using (IDbConnection connection = this.Connect())
             {
-                var jObject = JObject.Parse(userCredentialJsonObject);
+                var jObject = JObject.Parse(userSchemaJsonObject);
 
                 UserSchema userSchema = new UserSchema(jObject["Username"].ToString(), jObject["Password"].ToString());
 
@@ -64,13 +58,14 @@ namespace MTCG_Server.DB
             return true;
         }
 
-        public string Login(string userCredentialJsonObject)
+        // Finished.
+        public string Login(string userSchemaJsonObject)
         {
-            var jObject = JObject.Parse(userCredentialJsonObject);
+            var jObject = JObject.Parse(userSchemaJsonObject);
 
             UserSchema userSchema = new UserSchema(jObject["Username"].ToString(), jObject["Password"].ToString());
 
-            if (this.IsUserExist(userSchema.Name) && this.VerifyPasswordOfUser(userSchema))
+            if (this.IsUserExist(userSchema.Name) && this.IsUserPasswordValid(userSchema))
             {
                 return userSchema.Token;
             }
@@ -78,19 +73,20 @@ namespace MTCG_Server.DB
             return null;
         }
 
+        // Finished.
         public bool CreatePackage(string packageJsonObject, string creatorToken)
         {
             if (this.AddPackage(creatorToken) && this.AddPackageCards(packageJsonObject))
                 return true;
 
-            if (this.DeleteInvalidIDFromPackage())
+            if (this.DeleteLastPackage())
                 return false;
             return false;
         }
 
+        // Finished.
         public bool AcquirePackage(string userToken)
         {
-
             /*
            * 1) Check, if user has enough coins to buy package.
            * 2) Check, if package is available.
@@ -101,11 +97,11 @@ namespace MTCG_Server.DB
            * 6) detect 5 coins of user
            */
 
-            // 1
-            if (this.HasEnoughCoins(userToken))
+            if (this.HasEnoughCoins(userToken) && (this.GetLastId("package") - 1) != 0)
             {
-                // 2
-                if (this.GetLastPackageId() != 0)
+                List<CardSchema> cardSchemas = this.FetchCardsFromPackageCardsTable(this.GetLastId("package") - 1);
+
+                if (this.AddUserCards(cardSchemas, userToken) && this.DeleteLastPackage() && this.UpdateUserCoins(userToken))
                 {
                     return true;
                 }
@@ -113,10 +109,67 @@ namespace MTCG_Server.DB
                 return false;
             }
 
-            return true;
+            return false;
         }
 
+        public string FetchAllCardOfSpecificUser(string userToken)
+        {
+            if (!string.IsNullOrEmpty(userToken))
+            {
+                var cards = new List<CardSchemaWithUserToken>();
 
+                using (IDbConnection connection = this.Connect())
+                {
+                    connection.Open();
+                    IDbCommand cmd = connection.CreateCommand();
+
+                    cmd.Connection = connection;
+                    cmd.CommandText = "Select * from usercards where usertoken=@usertoken";
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new NpgsqlParameter("@usertoken", userToken));
+                    NpgsqlDataReader reader = (NpgsqlDataReader)cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        cards.Add(new CardSchemaWithUserToken(reader[2].ToString(), reader[3].ToString(), reader[4].ToString(), reader[1].ToString()));
+                    }
+                    cmd.Dispose();
+                    connection.Close();
+                }
+
+                return JsonConvert.SerializeObject(cards);
+            }
+            return null;
+        }
+
+        // Finished.
+        private List<CardSchema> FetchCardsFromPackageCardsTable(int packageId)
+        {
+            var cards = new List<CardSchema>(5);
+
+            using (IDbConnection connection = this.Connect())
+            {
+                connection.Open();
+                IDbCommand cmd = connection.CreateCommand();
+
+                cmd.Connection = connection;
+                cmd.CommandText = "Select * from packagecards where pid=@pid";
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.Add(new NpgsqlParameter("@pid", packageId));
+                NpgsqlDataReader reader = (NpgsqlDataReader)cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    cards.Add(new CardSchema(reader[0].ToString(), reader[1].ToString(), reader[2].ToString()));
+                }
+                cmd.Dispose();
+                connection.Close();
+            }
+
+            return cards;
+        }
+
+        // Finished.
         private bool HasEnoughCoins(string userToken)
         {
             try
@@ -151,7 +204,9 @@ namespace MTCG_Server.DB
 
             return false;
         }
-        private bool DeleteInvalidIDFromPackage()
+
+        // Finished.
+        private bool DeleteLastPackage()
         {
             using (IDbConnection connection = this.Connect())
             {
@@ -162,7 +217,7 @@ namespace MTCG_Server.DB
                     cmd.Connection = connection;
                     cmd.CommandText = "Delete from package where id=@id";
                     cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.Add(new NpgsqlParameter("@id", this.GetLastPackageId() - 1));
+                    cmd.Parameters.Add(new NpgsqlParameter("@id", this.GetLastId("package") - 1));
                     cmd.ExecuteNonQuery();
                     cmd.Dispose();
                 }
@@ -179,11 +234,112 @@ namespace MTCG_Server.DB
 
             return true;
         }
+
+        // Finished.
+        private int GetUserCoins(string userToken)
+        {
+            try
+            {
+                using (IDbConnection connection = this.Connect())
+                {
+                    connection.Open();
+
+                    IDbCommand cmd = connection.CreateCommand();
+
+                    cmd.Connection = connection;
+                    cmd.CommandText = "Select * from users where token=@token";
+                    cmd.Parameters.Add(new NpgsqlParameter("@token", userToken));
+
+                    NpgsqlDataReader reader = (NpgsqlDataReader)cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        return Convert.ToInt32(reader[3].ToString());
+                    }
+                    cmd.Dispose();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message); // just to print error on console.
+            }
+
+            return 0;
+        }
+
+        // Finished.
+        private bool UpdateUserCoins(string userToken)
+        {
+            using (IDbConnection connection = this.Connect())
+            {
+                try
+                {
+                    connection.Open();
+                    IDbCommand cmd = connection.CreateCommand();
+                    cmd.CommandText = "update users set coins=@coins where token=@token";
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new NpgsqlParameter("@token", userToken));
+                    cmd.Parameters.Add(new NpgsqlParameter("@coins", this.GetUserCoins(userToken) - 5));
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+
+                return true;
+            }
+        }
+
+        // Finished.
+        private bool AddUserCards(List<CardSchema> cards, string userToken)
+        {
+            using (IDbConnection connection = this.Connect())
+            {
+                try
+                {
+                    connection.Open();
+
+                    foreach (var item in cards)
+                    {
+                        IDbCommand cmd = connection.CreateCommand();
+                        cmd.CommandText = "Insert into usercards values(@id, @usertoken, @cardid, @name, @damage)";
+                        cmd.Parameters.Add(new NpgsqlParameter("@id", this.GetLastId("usercards")));
+                        cmd.Parameters.Add(new NpgsqlParameter("@usertoken", userToken));
+                        cmd.Parameters.Add(new NpgsqlParameter("@cardid", item.ID));
+                        cmd.Parameters.Add(new NpgsqlParameter("@name", item.Name));
+                        cmd.Parameters.Add(new NpgsqlParameter("@damage", item.Damage));
+                        cmd.ExecuteNonQuery();
+                        cmd.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+
+                return true;
+            }
+        }
+
+        // Finished.
         private bool AddPackageCards(string packageCards)
         {
             using (IDbConnection connection = this.Connect())
             {
-                int id = this.GetLastPackageId();
+                int id = this.GetLastId("package") - 1;
                 try
                 {
                     connection.Open();
@@ -203,6 +359,7 @@ namespace MTCG_Server.DB
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     return false;
                 }
                 finally
@@ -213,7 +370,9 @@ namespace MTCG_Server.DB
                 return true;
             }
         }
-        private bool VerifyPasswordOfUser(UserSchema userSchema)
+
+        // Finished.
+        private bool IsUserPasswordValid(UserSchema userSchema)
         {
             bool isMatched = false;
             try
@@ -246,6 +405,8 @@ namespace MTCG_Server.DB
 
             return false;
         }
+
+        // Finished.
         private bool IsUserExist(string username)
         {
             try
@@ -279,6 +440,8 @@ namespace MTCG_Server.DB
 
             return false;
         }
+
+        // Finished.
         private bool AddPackage(string creatorToken)
         {
             try
@@ -287,7 +450,7 @@ namespace MTCG_Server.DB
                 {
                     connection.Open();
 
-                    PackageSchema packageSchema = new PackageSchema(this.GetLastPackageId() + 1, creatorToken);
+                    PackageSchema packageSchema = new PackageSchema(this.GetLastId("package"), creatorToken);
 
                     IDbCommand cmd = connection.CreateCommand();
                     cmd.CommandText = "Insert into package values(@id, @creatorToken)";
@@ -306,7 +469,9 @@ namespace MTCG_Server.DB
                 return false;
             }
         }
-        private int GetLastPackageId()
+
+        // Finished.
+        private int GetLastId(string tableName)
         {
             int id = 0;
             using (IDbConnection connection = this.Connect())
@@ -315,7 +480,7 @@ namespace MTCG_Server.DB
                 IDbCommand cmd = connection.CreateCommand();
 
                 cmd.Connection = connection;
-                cmd.CommandText = "Select id from package";
+                cmd.CommandText = $"Select id from {tableName}";
                 NpgsqlDataReader reader = (NpgsqlDataReader)cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -324,8 +489,8 @@ namespace MTCG_Server.DB
                 }
                 cmd.Dispose();
                 connection.Close();
-
-                return id;
+                Console.WriteLine(id);
+                return id + 1;
             }
         }
     }

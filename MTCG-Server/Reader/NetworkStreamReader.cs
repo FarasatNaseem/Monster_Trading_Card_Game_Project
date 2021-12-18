@@ -20,24 +20,31 @@
         {
             int next_char;
             string data = "";
-            while (true)
+            try
             {
-                next_char = this.NetworkStream.ReadByte();
+                while (true)
+                {
+                    next_char = this.NetworkStream.ReadByte();
 
-                if (next_char == '\n')
-                {
-                    break;
-                }
-                if (next_char == '\r')
-                {
-                    continue;
-                }
-                if (next_char == -1)
-                {
-                    continue;
-                };
+                    if (next_char == '\n')
+                    {
+                        break;
+                    }
+                    if (next_char == '\r')
+                    {
+                        continue;
+                    }
+                    if (next_char == -1)
+                    {
+                        continue;
+                    };
 
-                data += Convert.ToChar(next_char);
+                    data += Convert.ToChar(next_char);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             return data;
         }
