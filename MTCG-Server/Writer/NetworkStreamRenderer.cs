@@ -1,6 +1,7 @@
 ﻿namespace MTCG_Server.Writer
 {
     using MTCG_Server.Handler.ResponseHandler;
+    using System;
     using System.Collections;
     using System.Linq;
     using System.Net.Sockets;
@@ -34,8 +35,15 @@
 
         private static void Write(NetworkStream stream, string text)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(text);
-            stream.Write(bytes, 0, bytes.Length);
+            try
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(text);
+                stream.Write(bytes, 0, bytes.Length);
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+            }
         }
     }
 }

@@ -58,6 +58,5 @@ namespace MTCG_Server.Controller
                 Path = request.Path
             };
         }
-
     }
 }

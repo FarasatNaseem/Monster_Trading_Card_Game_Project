@@ -37,7 +37,7 @@ namespace MTCG_Server.Controller
         // Working.
         private HttpResponse ControlRegisterUserRequest(HttpRequest request)
         {
-            string content = this.DbInstance.Register(request.Content) ? "You are now registered" : "You are already registered";
+            string content = this.DbInstance.Register(request.Content) ? "You are now registered." : "This user has been already taken.";
 
             int code = ((int)HttpStatusCode.Ok);
 
@@ -94,11 +94,5 @@ namespace MTCG_Server.Controller
                 Path = request.Path
             };
         }
-
-        private HttpResponse ControlGetSessionUserRequest(HttpRequest request)
-        {
-            return new HttpResponse();
-        }
-
     }
 }

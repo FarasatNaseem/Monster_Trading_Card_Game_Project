@@ -12,6 +12,12 @@ namespace MTCG_Server.DB
         {
             this.Name = name;
             this.Password = password;
+            this.Coin = 20;
+        }
+        public int Coin
+        {
+            get;
+            set;
         }
 
         public string Name
