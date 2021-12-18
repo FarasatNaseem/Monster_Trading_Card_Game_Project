@@ -14,6 +14,7 @@ namespace MTCG_Server.DB
             this.Password = password;
             this.Coin = 20;
         }
+
         public int Coin
         {
             get;

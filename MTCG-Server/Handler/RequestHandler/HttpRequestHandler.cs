@@ -45,15 +45,18 @@ namespace MTCG_Server.Handler.RequestHandler
 
         protected override void Handle()
         {
-            if (this.Stream.DataAvailable)
+            //while (true)
             {
-                // New request.
-                this.reader = new HttpRequestReader(this.Stream);
-                HttpRequest httpRequest = this.reader.Read();
-
-                if (httpRequest != null)
+                if (this.Stream.CanRead && this.Stream.DataAvailable)
                 {
-                    this.FireOnReceivedRequest(httpRequest);
+                    // New request.
+                    this.reader = new HttpRequestReader(this.Stream);
+                    HttpRequest httpRequest = this.reader.Read();
+
+                    if (httpRequest != null)
+                    {
+                        this.FireOnReceivedRequest(httpRequest);
+                    }
                 }
             }
 

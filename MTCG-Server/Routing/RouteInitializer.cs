@@ -14,7 +14,8 @@
             {
                 this.InitializeRegisterRoute(),
                 this.InitializeLoginRoute(),
-                this.InitializePackagesRoute()
+                this.InitializeCreatePackagesRoute(),
+                this.InitializeAcquirePackagesRoute()
             };
         }
 
@@ -42,7 +43,7 @@
             };
         }
 
-        private Route InitializePackagesRoute()
+        private Route InitializeCreatePackagesRoute()
         {
             this.controller = new CardController();
 
@@ -50,6 +51,18 @@
             {
                 Callable = this.controller.Control,
                 Url = "/packages",
+                Method = HttpMethod.POST
+            };
+        }
+
+        private Route InitializeAcquirePackagesRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/transactions/packages",
                 Method = HttpMethod.POST
             };
         }

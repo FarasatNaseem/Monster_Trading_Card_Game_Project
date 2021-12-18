@@ -14,6 +14,7 @@ namespace MTCG_Client.GameSpecific
         {
             Console.WriteLine("\n\nL... LOGIN");
             Console.WriteLine("R... REGISTER");
+            Console.WriteLine("C... RUN CURL SCRIPT TO TEST APIs");
             Console.WriteLine("Q... QUIT");
         }
     }

@@ -34,6 +34,7 @@ namespace MTCG_Client.GameSpecific
 
                 char mainMenuCommand = this.mainMenuCommandReader.Read();
 
+                Console.Clear();
                 switch (mainMenuCommand)
                 {
                     case 'L':
@@ -67,7 +68,16 @@ namespace MTCG_Client.GameSpecific
                         Console.WriteLine("Status: " + ((RegistrationResponse)response).StatusCode);
                         Console.WriteLine("-------------------------------------------------------");
                         break;
+                    case 'C':
+                        System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                        proc.EnableRaisingEvents = false;
+                        proc.StartInfo.FileName = @"C:\Users\Privat\Downloads\MonsterTradingCards.exercise.curl (2).bat";
+                        proc.Start();
+                       
+                        Console.WriteLine("Curl Script is now testing APIs");
+                        break;
                     case 'Q':
+                        Environment.Exit(0);
                         break;
                     default:
                         break;

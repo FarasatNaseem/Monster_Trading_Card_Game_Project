@@ -61,8 +61,6 @@
             {
                 this.listener.Start();
 
-                Console.WriteLine("Waiting for clients...");
-
                 while (!args.Exit)
                 {
                     TcpClient client = this.listener.AcceptTcpClient();

@@ -47,7 +47,7 @@
 
         protected override void Handle()
         {
-            List<Route> routes = this.Routes.Where(x => Regex.Match(this.Request.Path.ToLower(), x.Url).Success).ToList();
+            List<Route> routes = this.Routes.Where(x => this.Request.Path == x.Url).ToList();
 
             if (!routes.Any())
             {

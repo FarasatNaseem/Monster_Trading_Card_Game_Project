@@ -15,6 +15,7 @@ namespace MTCG_Server.DB
             this.Damage = damage;
         }
 
+      
         public string ID
         {
             get;

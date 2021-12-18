@@ -57,10 +57,6 @@ namespace MTCG_Server.Controller
                 ReasonPhrase = HttpStatusCode.Ok.ToString(),
                 Status = HttpStatusCode.Ok,
                 ContentAsUTF8 = message,
-                //"{" +
-                //   $"\"\n    \"Content\": \"{content}" +
-                //    $"\"\n    \"Status\": \"{code}\"" +
-                //    "\n}",
                 Path = request.Path
             };
         }

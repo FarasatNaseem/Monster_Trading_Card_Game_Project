@@ -27,9 +27,17 @@ namespace MTCG_Server.Controller
             return request.Path switch
             {
                 // Create packages
-                "/packages" => ControlCreatePackageRequest(request),
+                "/packages" => this.ControlCreatePackageRequest(request),
+                "/transactions/packages" => this.ControlAcquirePackageRequest(request),
                 _ => new HttpResponse()
             };
+        }
+
+        private HttpResponse ControlAcquirePackageRequest(HttpRequest request)
+        {
+            bool isCardsAcquired = this.DbInstance.AcquirePackage(request.Token);
+
+            return null;
         }
 
         private HttpResponse ControlCreatePackageRequest(HttpRequest request)
