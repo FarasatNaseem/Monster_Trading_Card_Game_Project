@@ -6,17 +6,27 @@
     public class RouteInitializer : IInitializer<List<Route>>
     {
         private IController controller;
+        private List<Route> routes;
+
+        public RouteInitializer()
+        {
+            this.routes = new List<Route>();
+            this.InitializeLoggedInUserRoute();
+        }
 
         public List<Route> Initialize()
         {
-            return new List<Route>()
-            {
-                this.InitializeRegisterRoute(),
-                this.InitializeLoginRoute(),
-                this.InitializeCreatePackagesRoute(),
-                this.InitializeAcquirePackagesRoute(),
-                this.InitializeGetCardRoute()
-            };
+            this.routes.Add(this.InitializeRegisterRoute());
+            this.routes.Add(this.InitializeLoginRoute());
+            this.routes.Add(this.InitializeCreatePackagesRoute());
+            this.routes.Add(this.InitializeAcquirePackagesRoute());
+            this.routes.Add(this.InitializeGetCardRoute());
+            this.routes.Add(this.InitializeGetDeckCardRoute());
+            this.routes.Add(this.InitializeUpdateDeckCardRoute());
+            this.routes.Add(this.InitializeGetStatsRoute());
+            this.routes.Add(this.InitializeBattleRoute());
+
+            return this.routes;
         }
 
         private Route InitializeRegisterRoute()
@@ -77,6 +87,76 @@
                 Url = "/cards",
                 Method = HttpMethod.GET
             };
+        }
+
+        private Route InitializeGetDeckCardRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/deck",
+                Method = HttpMethod.GET
+            };
+        }
+
+        private Route InitializeUpdateDeckCardRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/deck",
+                Method = HttpMethod.PUT
+            };
+        }
+
+        private Route InitializeGetStatsRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/stats",
+                Method = HttpMethod.GET
+            };
+        }
+
+        private Route InitializeBattleRoute()
+        {
+            this.controller = new BattleController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/battles",
+                Method = HttpMethod.POST
+            };
+        }
+
+        private void InitializeLoggedInUserRoute()
+        {
+            this.controller = new UserController();
+
+            foreach (var name in this.controller.DbInstance.FetchAllLoggedInUsername())
+            {
+                this.routes.Add(new Route()
+                {
+                    Callable = this.controller.Control,
+                    Url = $"/users/{name}",
+                    Method = HttpMethod.GET
+                });
+
+                this.routes.Add(new Route()
+                {
+                    Callable = this.controller.Control,
+                    Url = $"/users/{name}",
+                    Method = HttpMethod.PUT
+                });
+            }
         }
     }
 }

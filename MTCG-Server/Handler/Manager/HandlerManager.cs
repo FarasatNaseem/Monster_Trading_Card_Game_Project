@@ -16,7 +16,7 @@
     public class HandlerManager
     {
         private HttpRequestHandler requestHandler;
-        private IInitializer<List<Route>> initializer;
+        private IInitializer<List<Route>> cardRouteInitializer;
         private HttpResponseHandler responseHandler;
         private IRenderer renderer;
         private List<Route> routes;
@@ -24,7 +24,7 @@
         {
             this.InputStream = inputStream;
             this.OutputStream = outputStream;
-            this.initializer = new RouteInitializer();
+            this.cardRouteInitializer = new RouteInitializer();
         }
 
         public NetworkStream InputStream
@@ -52,7 +52,7 @@
         {
             this.requestHandler = new HttpRequestHandler(this.InputStream);
             this.requestHandler.OnRequestReceived += RequestHandlerOnRequestReceived;
-            this.routes = this.initializer.Initialize();
+            this.routes = this.cardRouteInitializer.Initialize();
             this.requestHandler.Start();
         }
 

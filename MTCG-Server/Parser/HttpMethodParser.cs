@@ -23,16 +23,16 @@ namespace MTCG_Server.Parser
                 throw new InvalidOperationException("Invalid http request!");
             }
 
-            if (tokens[0] == "GET")
-                return HttpMethod.GET;
-            if (tokens[0] == "POST")
-                return HttpMethod.POST;
-            if (tokens[0] == "DELETE")
-                return HttpMethod.DELETE;
-            if (tokens[0] == "PETCH")
-                return HttpMethod.PATCH;
 
-            return HttpMethod.NONE;
+            return tokens[0] switch
+            {
+                "GET" => HttpMethod.GET,
+                "POST" => HttpMethod.POST,
+                "DELETE" => HttpMethod.DELETE,
+                "PATCH" => HttpMethod.PATCH,
+                "PUT" => HttpMethod.PUT,
+                _ => HttpMethod.NONE
+            };
         }
     }
 }

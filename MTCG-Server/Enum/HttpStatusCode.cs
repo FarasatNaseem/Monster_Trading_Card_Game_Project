@@ -12,6 +12,7 @@
         Forbidden = 403,
         NotFound = 404,
         MethodNotAllowed = 405,
-        InternalServerError = 500
+        InternalServerError = 500,
+        Unauthorized = 401
     }
 }

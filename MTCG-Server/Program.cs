@@ -7,10 +7,10 @@
     {
         private static void Main(string[] args)
         {
+            Console.CursorVisible = false;
             try
             {
-                HttpServer httpServer = new HttpServer(10001);
-                httpServer.Start();
+                 new HttpServer(10001).Start();
             }
             catch (SocketException se)
             {

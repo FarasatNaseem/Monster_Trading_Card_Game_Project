@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MTCG_Server.DB
+﻿namespace MTCG_Server.DB
 {
     public class CardSchema
     {
-        public CardSchema(string id, string name, string damage)
+        public CardSchema(string id, string name, string damage, string type)
         {
             this.ID = id;
             this.Name = name;
             this.Damage = damage;
+            this.Type = type;
         }
 
-      
+        public string Type
+        {
+            get;
+            private set;
+        }
+
+
         public string ID
         {
             get;
@@ -31,7 +32,8 @@ namespace MTCG_Server.DB
         public string Damage
         {
             get;
-            set;
+            private set;
         }
+
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MTCG_Server.Enum
+﻿namespace MTCG_Server.Enum
 {
     public enum HttpMethod
     {
@@ -12,6 +6,7 @@ namespace MTCG_Server.Enum
         POST,
         PATCH,
         DELETE,
+        PUT,
         NONE
     }
 }

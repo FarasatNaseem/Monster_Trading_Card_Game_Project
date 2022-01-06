@@ -35,9 +35,22 @@
                     requestContent = this.ParseParametersFromRequestURL(url);
 
                     break;
-                case HttpMethod.POST:
+                case HttpMethod.POST: 
 
-                    requestContent = this.ParseContentFromPOSTRequest(headers, stream);
+                    requestContent = this.ParseContentFromRequest(headers, stream);
+
+                    if (requestContent == null)
+                    {
+                        throw new ArgumentException("Invalid post request");
+                    }
+
+
+
+                    break;
+                case HttpMethod.PUT:
+
+
+                    requestContent = this.ParseContentFromRequest(headers, stream);
 
                     if (requestContent == null)
                     {
@@ -52,7 +65,7 @@
             return requestContent;
         }
 
-        private string ParseContentFromPOSTRequest(Dictionary<string, string> headers, NetworkStream stream)
+        private string ParseContentFromRequest(Dictionary<string, string> headers, NetworkStream stream)
         {
             StringBuilder myCompleteMessage = new StringBuilder();
 
