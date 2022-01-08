@@ -13,6 +13,7 @@
             return self.Damage;
         }
 
+
         public Tuple<CardOwner, BattleRoundStatus> Process(Card playerACard, Card playerBCard)
         {
             double playerADamage = this.CalculateDamage(playerACard, playerBCard);

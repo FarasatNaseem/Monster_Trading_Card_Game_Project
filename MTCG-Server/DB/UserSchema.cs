@@ -66,10 +66,8 @@
 
         public string Token
         {
-            get
-            {
-                return "Basic " + this.Name + "-mtcgToken";
-            }
+            get;
+            set;
         }
     }
 }

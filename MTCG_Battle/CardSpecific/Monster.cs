@@ -13,6 +13,10 @@ namespace MTCG_Battle
             this.MonsterCardType = monsterCardType;
         }
 
+        public Monster(int x, int y) : base(x, y) { }
+
+        public Monster(string name) : base(name) { }
+
         public MonsterCardType MonsterCardType
         {
             get;

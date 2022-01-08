@@ -50,7 +50,7 @@ namespace MTCG_Battle
         {
             while (!this.isDetectorRunning)
             {
-                if (_playerA.X == _playerB.X && _playerA.Y == _playerB.Y)
+                if(IsCollied(_playerA.X, _playerB.X, _playerA.Y, _playerB.Y))
                 {
                     this.FireOnCollisionDetected(_playerA, _playerB);
                     break;
@@ -58,6 +58,15 @@ namespace MTCG_Battle
             }
 
             this.Stop();
+        }
+
+        public bool IsCollied(int playerAX, int playerBX, int playerAY, int playerBY)
+        {
+            if(playerAX == playerBX && playerAY == playerBY)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

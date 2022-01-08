@@ -14,17 +14,37 @@ namespace MTCG_Battle
         private int _y;
         private CardThreadArgs threadArgs;
         private Thread cardThread;
+        public Card() { }
+
         public Card(string name, double damage, CardElementType type, CardOwner cardStatus)
         {
-            this.Name = name;
-            this.Damage = damage;
-            this.ElementType = type;
-            this.Owner = cardStatus;
-            this.X = this.Owner == CardOwner.PlayerA ? 0 : Console.WindowWidth - 1;
-            this.Y = Console.WindowHeight % 2 == 0 ? Console.WindowHeight / 2 : (Console.WindowHeight + 1) / 2; 
-            this.Color = this.Owner == CardOwner.PlayerA ? CardColor.Yellow : CardColor.Blue;
-            this.Direction = this.Owner == CardOwner.PlayerA ? Direction.Right : Direction.Left;
-            this.threadArgs = new CardThreadArgs();
+            try
+            {
+                this.Name = name;
+                this.Damage = damage;
+                this.ElementType = type;
+                this.Owner = cardStatus;
+                this.X = this.Owner == CardOwner.PlayerA ? 0 : Console.WindowWidth - 1;
+                this.Y = 13;/* Console.WindowHeight % 2 == 0 ? Console.WindowHeight / 2 : (Console.WindowHeight + 1) / 2;*/
+                this.Color = this.Owner == CardOwner.PlayerA ? CardColor.Yellow : CardColor.Blue;
+                this.Direction = this.Owner == CardOwner.PlayerA ? Direction.Right : Direction.Left;
+                this.threadArgs = new CardThreadArgs();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public Card(string name) 
+        {
+            this.Name = name; 
+        }
+       
+
+        public Card(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
         }
 
         public event EventHandler<CardPositionChangedEventArgs> OnPositionChanged;
@@ -41,7 +61,6 @@ namespace MTCG_Battle
             set;
         }
 
-      
         public CardElementType ElementType
         {
             get;
@@ -116,8 +135,11 @@ namespace MTCG_Battle
 
         public void StopPlaying()
         {
-            this.threadArgs.Exit = true;
-            this.cardThread.Join();
+            if (this.cardThread != null)
+            {
+                this.threadArgs.Exit = true;
+                this.cardThread.Join();
+            }
         }
 
         private void Move(object data)
@@ -126,7 +148,7 @@ namespace MTCG_Battle
 
             while (!args.Exit)
             {
-                Thread.Sleep(50);
+                Thread.Sleep(10);
                 switch (this.Direction)
                 {
                     case Direction.Right:
@@ -147,10 +169,16 @@ namespace MTCG_Battle
                         break;
                 }
 
-                if (this.X == Console.WindowWidth - 1)
-                    this.Direction = Direction.Left;
-                if (this.X == 0)
-                    this.Direction = Direction.Right;
+                try
+                {
+                    if (this.X == Console.WindowWidth - 1)
+                        this.Direction = Direction.Left;
+                    if (this.X == 0)
+                        this.Direction = Direction.Right;
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 

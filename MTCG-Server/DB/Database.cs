@@ -322,7 +322,7 @@
             using (IDbConnection connection = Connect())
             {
 
-                if (!this.IsUserExist(userToken))
+                if (this.IsUserExist(userToken))
                 {
                     connection.Open();
                     IDbCommand cmd = connection.CreateCommand();
@@ -361,6 +361,21 @@
             return true;
         }
 
+        public List<ScoreSchema> FetchScore(string userToken)
+        {
+            var stats = this.FetchUserStats(userToken);
+            var scores = new List<ScoreSchema>();
+
+            foreach (var item in stats)
+            {
+                scores.Add(new ScoreSchema(item.Elo));
+            }
+
+            if (scores.Count == 0)
+                return null;
+            return scores;
+        }
+
         public List<StatsSchema> FetchUserStats(string userToken)
         {
             if (!string.IsNullOrEmpty(userToken))
@@ -375,30 +390,29 @@
                         IDbCommand cmd = connection.CreateCommand();
 
                         cmd.Connection = connection;
-                        cmd.CommandText = "Select * from stats where playertoken=@playertoken";
+                        cmd.CommandText = "Select * from statsdata where usertoken=@usertoken";
                         cmd.CommandType = CommandType.Text;
-                        cmd.Parameters.Add(new NpgsqlParameter("@playertoken", userToken));
+                        cmd.Parameters.Add(new NpgsqlParameter("@usertoken", userToken));
                         NpgsqlDataReader reader = (NpgsqlDataReader)cmd.ExecuteReader();
-                        cmd.Dispose();
+
                         while (reader.Read())
                         {
-                            //statsSchema.Add(new StatsSchema(Convert.ToInt32(reader[0].ToString()), reader[1].ToString(), reader[2].ToString(), Convert.ToInt32(reader[3].ToString()), reader[4].ToString()));
+                              statsSchema.Add(new StatsSchema(reader[8].ToString(), Convert.ToInt32(reader[4].ToString()), Convert.ToInt32(reader[3].ToString()), Convert.ToInt32(reader[5].ToString()), Convert.ToInt32(reader[6].ToString()), reader[1].ToString(), reader[2].ToString(), reader[7].ToString()));
                         }
+                        cmd.Dispose();
+                        return statsSchema;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         return null;
                     }
                     finally
                     {
+
                         connection.Close();
                     }
                 }
             }
-            return null;
-        }
-        public List<int> FetchUserScore(string userToken)
-        {
             return null;
         }
 

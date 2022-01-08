@@ -1,16 +1,11 @@
-﻿using MTCG_Server.DB;
-using MTCG_Server.Enum;
-using MTCG_Server.Handler.RequestHandler;
-using MTCG_Server.Handler.ResponseHandler;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MTCG_Server.Controller
+﻿namespace MTCG_Server.Controller
 {
+    using MTCG_Server.DB;
+    using MTCG_Server.Enum;
+    using MTCG_Server.Handler.RequestHandler;
+    using MTCG_Server.Handler.ResponseHandler;
+    using Newtonsoft.Json;
+
     public class UserController : IController
     {
         public UserController()
@@ -46,7 +41,8 @@ namespace MTCG_Server.Controller
         private HttpResponse ControlGetUserRequest(HttpRequest request)
         {
             string content = null;
-            // /a/b
+            int code;
+
             string nameFromPath = request.Path.Split('/')[2];
             string nameFromToken = request.Token.Split(' ')[1].Split('-')[0];
 
@@ -54,13 +50,22 @@ namespace MTCG_Server.Controller
             {
                 var user = this.DbInstance.FetchSpecificUser(request.Token);
 
-                content = user != null ? JsonConvert.SerializeObject(user, Formatting.Indented) : "Token cant be empty!";
+                if (user == null)
+                {
+                    content = "Token cant be empty!";
+                    code = ((int)HttpStatusCode.BadRequest);
+                }
+                else
+                {
+                    content = JsonConvert.SerializeObject(user, Formatting.Indented);
+                    code = ((int)HttpStatusCode.Ok);
+                }
             }
             else
+            {
                 content = "Path and token are not matching!";
-
-            int code = ((int)HttpStatusCode.Ok);
-
+                code = ((int)HttpStatusCode.BadRequest);
+            }
 
             string message = "{";
             message += "\n";
@@ -81,23 +86,33 @@ namespace MTCG_Server.Controller
             };
         }
 
-        // In process.
         private HttpResponse ControlEditUserRequest(HttpRequest request)
         {
             string content = null;
+            int code =0;
             // /a/b
             string nameFromPath = request.Path.Split('/')[2];
             string nameFromToken = request.Token.Split(' ')[1].Split('-')[0];
 
             if (nameFromPath == nameFromToken)
             {
-                content = this.DbInstance.UpdateSpecificUserData(request.Token, request.Content) ? "User data is successfully edited" : "Due to some error user data cant be updated!";
+
+                if (this.DbInstance.UpdateSpecificUserData(request.Token, request.Content))
+                {
+                    content = "User data is successfully edited";
+                    code = ((int)HttpStatusCode.Ok);
+                }
+                else
+                {
+                    content = "Due to some error user data cant be updated!";
+                    code = ((int)HttpStatusCode.BadRequest);
+                }
             }
             else
+            {
                 content = "Path and token are not matching!";
-
-            int code = ((int)HttpStatusCode.Ok);
-
+                code = ((int)HttpStatusCode.BadRequest);
+            }
 
             string message = "{";
             message += "\n";
@@ -118,7 +133,6 @@ namespace MTCG_Server.Controller
             };
         }
 
-        // Working.
         private HttpResponse ControlRegisterUserRequest(HttpRequest request)
         {
             string content = this.DbInstance.Register(request.Content) ? "You are now registered." : "This user has been already taken.";
@@ -145,24 +159,9 @@ namespace MTCG_Server.Controller
             };
         }
 
-        // Working.
         private HttpResponse ControlLoginUserRequest(HttpRequest request)
         {
             string token = this.DbInstance.Login(request.Content);
-
-            //string message = "{";
-            //message += "\n";
-            //message += "    \"Content\":";
-            //message += $" \"{content}\",";
-            //message += "\n";
-            //message += "    \"Token\":";
-            //message += $" \"{token}\",";
-            //message += "\n";
-            //message += "    \"Status\":";
-            //message += $" \"{code}\"";
-            //message += "\n";
-            //message += "}";
-
 
             return new HttpResponse()
             {

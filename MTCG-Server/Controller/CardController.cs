@@ -78,9 +78,19 @@ namespace MTCG_Server.Controller
 
         private HttpResponse ControlAcquirePackageRequest(HttpRequest request)
         {
-            string content = this.DbInstance.AcquirePackage(request.Token) ? "Package is acquired" : "Due to some error package can't be acquired";
+            string content = null;
+            int code;
+            if (this.DbInstance.AcquirePackage(request.Token))
+            {
+                content = "Package is acquired";
+                code = ((int)HttpStatusCode.Ok);
+            }
+            else
+            {
+                content = "Due to some error package can't be acquired";
+                code = ((int)HttpStatusCode.BadRequest);
+            }
 
-            int code = ((int)HttpStatusCode.Ok);
 
             string message = "{";
             message += "\n";
@@ -105,9 +115,20 @@ namespace MTCG_Server.Controller
 
         private HttpResponse ControlCreatePackageRequest(HttpRequest request)
         {
-            string content = this.DbInstance.CreatePackage(request.Content, request.Token) ? "Packages are created" : "Due to some error packages can't be created";
+            string content = null;
+            int code;
 
-            int code = ((int)HttpStatusCode.Ok);
+            if (this.DbInstance.CreatePackage(request.Content, request.Token))
+            {
+                content = "Packages are created";
+                code = ((int)HttpStatusCode.Ok);
+            }
+            else
+            {
+                content = "Due to some error packages can't be created";
+                code = ((int)HttpStatusCode.BadRequest);
+            }
+
 
             string message = "{";
             message += "\n";
@@ -184,9 +205,19 @@ namespace MTCG_Server.Controller
 
         private HttpResponse ControlUpdateDeckCardRequest(HttpRequest request)
         {
-            string content = this.DbInstance.ConfigureDeck(request.Token, request.Content) ? "Deck is configured" : "Due to some error deck can't be configured";
+            string content = null;
+            int code;
 
-            int code = ((int)HttpStatusCode.Ok);
+            if (this.DbInstance.ConfigureDeck(request.Token, request.Content))
+            {
+                content = "Deck is configured";
+                code = ((int)HttpStatusCode.Ok);
+            }
+            else
+            {
+                content = "Due to some error deck can't be configured";
+                code = ((int)HttpStatusCode.BadRequest);
+            }
 
             string message = "{";
             message += "\n";

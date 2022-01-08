@@ -1,7 +1,6 @@
 ﻿namespace MTCG_Battle
 {
     using System;
-    using System.Threading;
 
     public class Battle
     {
@@ -13,6 +12,8 @@
         private bool isRoundFinished;
         private int totalRound = 30;
         private int currentRound = 0;
+
+        public Battle() { }
 
         public Battle(Player playerA, Player playerB)
         {
@@ -41,7 +42,7 @@
                         playerACard.StartPlaying();
                         playerBCard.StartPlaying();
                         this.collisionDetector = new CardCollisionDetector(playerACard, playerBCard);
-                        this.collisionDetector.OnCollisionDetected += CollisionDetectorOnCollisionDetected;
+                        this.collisionDetector.OnCollisionDetected += CollisionDetectorBattleOnCollisionDetected;
                         this.collisionDetector.Start();
                     }
 
@@ -86,15 +87,15 @@
                 return new Result(this.playerB.Username, this.playerA.Username, this.playerA.PlayerWinningSteak, this.playerB.PlayerWinningSteak, this.playerA.Elo, this.playerB.Elo, "Won", drawSteak);
             }
 
-            return new Result(this.playerB.Username, this.playerA.Username, this.playerA.PlayerWinningSteak, this.playerB.PlayerWinningSteak, this.playerA.Elo, this.playerB.Elo, "Draw", drawSteak);
+            return new Result("-", "-", this.playerA.PlayerWinningSteak, this.playerB.PlayerWinningSteak, this.playerA.Elo, this.playerB.Elo, "Draw", drawSteak);
         }
 
-        private int CalculateTotalDrawSteak(int totalRound, int playerAWinningSteak, int playerBWinningSteak)
+        public int CalculateTotalDrawSteak(int totalRound, int playerAWinningSteak, int playerBWinningSteak)
         {
             return totalRound - (playerAWinningSteak + playerBWinningSteak);
         }
 
-        private void CollisionDetectorOnCollisionDetected(object sender, OnCollisionDetectedEventArgs e)
+        public void CollisionDetectorBattleOnCollisionDetected(object sender, OnCollisionDetectedEventArgs e)
         {
             Tuple<CardOwner, BattleRoundStatus> roundResult = null;
             double playerACardDamage = e.PlayerACard.Damage;
@@ -119,26 +120,33 @@
             if (roundResult.Item1 == CardOwner.PlayerA && roundResult.Item2 == BattleRoundStatus.Won)
             {
                 e.PlayerBCard.Owner = CardOwner.PlayerA;
-                this.playerA.Deck.Add(e.PlayerBCard);
+                this.playerA.AddCardInDeck(e.PlayerBCard);
                 this.playerB.RemoveFromDeck(e.PlayerBCard);
-                this.playerA.PlayerWinningSteak++;
-                this.playerA.Elo += 3;
-                this.playerB.Elo -= 5;
+                this.playerA.IncrementWinSteak(1);
+                this.playerA.IncrementElo(3);
+                this.playerB.DecrementElo(5);
             }
             else if (roundResult.Item1 == CardOwner.PlayerB && roundResult.Item2 == BattleRoundStatus.Won)
             {
                 e.PlayerACard.Owner = CardOwner.PlayerB;
-                this.playerB.Deck.Add(e.PlayerACard);
+                this.playerB.AddCardInDeck(e.PlayerACard);
                 this.playerA.RemoveFromDeck(e.PlayerACard);
-                this.playerB.PlayerWinningSteak++;
-                this.playerB.Elo += 3;
-                this.playerA.Elo -= 5;
+                this.playerB.IncrementWinSteak(1);
+                this.playerB.IncrementElo(3);
+                this.playerA.DecrementElo(5);
             }
 
             e.PlayerACard.StopPlaying();
             e.PlayerBCard.StopPlaying();
             this.isRoundFinished = true;
-            Console.Clear();
+
+            try
+            {
+                Console.Clear();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private Tuple<CardOwner, BattleRoundStatus> ProcessSpellVsSpellRound(Card playerACard, Card playerBCard)

@@ -25,6 +25,7 @@
             this.routes.Add(this.InitializeUpdateDeckCardRoute());
             this.routes.Add(this.InitializeGetStatsRoute());
             this.routes.Add(this.InitializeBattleRoute());
+            this.routes.Add(this.InitializeGetScoreRoute());
 
             return this.routes;
         }
@@ -115,12 +116,24 @@
 
         private Route InitializeGetStatsRoute()
         {
-            this.controller = new CardController();
+            this.controller = new BattleController();
 
             return new Route()
             {
                 Callable = this.controller.Control,
                 Url = "/stats",
+                Method = HttpMethod.GET
+            };
+        }
+
+        private Route InitializeGetScoreRoute()
+        {
+            this.controller = new BattleController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/score",
                 Method = HttpMethod.GET
             };
         }

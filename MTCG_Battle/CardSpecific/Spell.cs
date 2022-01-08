@@ -11,5 +11,8 @@ namespace MTCG_Battle
         public Spell(string name, double damage, CardElementType type, CardOwner cardStatus) : base(name, damage, type, cardStatus)
         {
         }
+
+        public Spell(int x, int y) : base(x, y) { }
+        public Spell(string name) : base(name) { }
     }
 }

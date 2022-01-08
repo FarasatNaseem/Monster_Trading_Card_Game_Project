@@ -39,14 +39,7 @@
             private set;
         }
 
-        private void Release()
-        {
-            this.OutputStream.Flush();
-            this.OutputStream.Close();
-            this.OutputStream = null;
-            this.InputStream.Close();
-            this.InputStream = null;
-        }
+        
 
         public void Start()
         {
@@ -63,9 +56,17 @@
             this.responseHandler.Start();
         }
 
+        private void Release()
+        {
+            this.OutputStream.Flush();
+            this.OutputStream.Close();
+            this.OutputStream = null;
+            this.InputStream.Close();
+            this.InputStream = null;
+        }
+
         private void ResponseHandlerOnResponseReceived(object sender, HttpResponseHandlerOnResponseReceivedFoundEventArgs e)
         {
-
             this.renderer = new NetworkStreamRenderer();
             this.renderer.Render(new ArrayList { e.Response, this.OutputStream });
             this.Release();
