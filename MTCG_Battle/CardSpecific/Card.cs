@@ -148,7 +148,7 @@ namespace MTCG_Battle
 
             while (!args.Exit)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(100);
                 switch (this.Direction)
                 {
                     case Direction.Right:

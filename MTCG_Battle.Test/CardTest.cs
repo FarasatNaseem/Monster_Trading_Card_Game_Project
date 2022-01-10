@@ -34,7 +34,7 @@ namespace MTCG_Battle.Test
         }
 
         [Test]
-        public void CardMovementDirectionOfPlayerN_Test()
+        public void CardMovementDirectionOfPlayerB_Test()
         {
             this.card = new Spell("Card1", 10, CardElementType.Fire, CardOwner.PlayerA);
 

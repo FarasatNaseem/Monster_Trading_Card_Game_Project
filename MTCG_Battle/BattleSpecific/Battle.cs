@@ -10,7 +10,7 @@
         private Player playerA;
         private Player playerB;
         private bool isRoundFinished;
-        private int totalRound = 5;
+        private int totalRound = 50;
         private int currentRound = 0;
 
         public Battle() { }

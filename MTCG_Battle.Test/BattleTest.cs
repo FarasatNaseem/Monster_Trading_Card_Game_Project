@@ -59,7 +59,7 @@ namespace MTCG_Battle.Test
 
         [Test]
         [TestCase(30, 15, 7)]
-        public void CalculateDrawCalculateTotalDrawSteak(int totalRound, int playerAWinningSteak, int playerBWinningSteak)
+        public void CalculateDrawCalculateTotalDrawSteak_Test(int totalRound, int playerAWinningSteak, int playerBWinningSteak)
         {
             var battle = new Mock<Battle>().Object;
 
