@@ -3,6 +3,7 @@ using MTCG_Server.Enum;
 using MTCG_Server.Handler.RequestHandler;
 using MTCG_Server.Handler.ResponseHandler;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace MTCG_Server.Controller
@@ -36,7 +37,47 @@ namespace MTCG_Server.Controller
                     HttpMethod.PUT => this.ControlUpdateDeckCardRequest(request),
                     _ => new HttpResponse()
                 },
+                "/tradings" => this.ControlCardTradeRequest(request),
                 _ => new HttpResponse()
+            };
+        }
+
+        private HttpResponse ControlCardTradeRequest(HttpRequest request)
+        {
+            var jObject = JObject.Parse(request.Content);
+            var tradeCardSchema = new TradeCardSchema(jObject["Id"].ToString(), "", jObject["MinimumDamage"].ToString(), jObject["Type"].ToString(), jObject["CardToTrade"].ToString());
+            string content = null;
+            int code;
+
+            if (this.DbInstance.Trade(request.Token, tradeCardSchema))
+            {
+                content = "Card is traded successfully";
+                code = ((int)HttpStatusCode.Ok);
+            }
+            else
+            {
+                content = "Due to some error trading is not successfully";
+                code = ((int)HttpStatusCode.BadRequest);
+            }
+
+            string message = "{";
+            message += "\n";
+            message += "    \"Content\":";
+            message += $" \"{content}\",";
+            message += "\n";
+            message += "    \"Status\":";
+            message += $" \"{code}\"";
+            message += "\n";
+            message += "}";
+
+
+            return new HttpResponse()
+            {
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
+                ContentAsUTF8 = message,
+
+                Path = request.Path
             };
         }
 
@@ -68,8 +109,8 @@ namespace MTCG_Server.Controller
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
 
                 Path = request.Path
@@ -105,8 +146,8 @@ namespace MTCG_Server.Controller
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
 
                 Path = request.Path
@@ -143,8 +184,8 @@ namespace MTCG_Server.Controller
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
 
                 Path = request.Path
@@ -195,8 +236,8 @@ namespace MTCG_Server.Controller
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
 
                 Path = request.Path
@@ -232,8 +273,8 @@ namespace MTCG_Server.Controller
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
 
                 Path = request.Path

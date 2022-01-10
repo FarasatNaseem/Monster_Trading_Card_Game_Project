@@ -26,8 +26,21 @@
             this.routes.Add(this.InitializeGetStatsRoute());
             this.routes.Add(this.InitializeBattleRoute());
             this.routes.Add(this.InitializeGetScoreRoute());
+            this.routes.Add(this.InitializeTradeCardRoute());
 
             return this.routes;
+        }
+
+        private Route InitializeTradeCardRoute()
+        {
+            this.controller = new CardController();
+
+            return new Route()
+            {
+                Callable = this.controller.Control,
+                Url = "/tradings",
+                Method = HttpMethod.POST
+            };
         }
 
         private Route InitializeRegisterRoute()

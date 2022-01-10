@@ -26,7 +26,7 @@
         public string Name
         {
             get;
-            private set;
+            set;
         }
 
         public string Damage

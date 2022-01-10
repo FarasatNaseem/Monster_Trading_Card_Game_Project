@@ -317,6 +317,7 @@
             }
         }
 
+        // Finished.
         public bool AddUserStats(string userToken, StatsSchema statsSchema)
         {
             using (IDbConnection connection = Connect())
@@ -361,6 +362,7 @@
             return true;
         }
 
+        // Finished.
         public List<ScoreSchema> FetchScore(string userToken)
         {
             var stats = this.FetchUserStats(userToken);
@@ -376,6 +378,7 @@
             return scores;
         }
 
+        // Finished.
         public List<StatsSchema> FetchUserStats(string userToken)
         {
             if (!string.IsNullOrEmpty(userToken))
@@ -397,7 +400,7 @@
 
                         while (reader.Read())
                         {
-                              statsSchema.Add(new StatsSchema(reader[8].ToString(), Convert.ToInt32(reader[4].ToString()), Convert.ToInt32(reader[3].ToString()), Convert.ToInt32(reader[5].ToString()), Convert.ToInt32(reader[6].ToString()), reader[1].ToString(), reader[2].ToString(), reader[7].ToString()));
+                            statsSchema.Add(new StatsSchema(reader[8].ToString(), Convert.ToInt32(reader[4].ToString()), Convert.ToInt32(reader[3].ToString()), Convert.ToInt32(reader[5].ToString()), Convert.ToInt32(reader[6].ToString()), reader[1].ToString(), reader[2].ToString(), reader[7].ToString()));
                         }
                         cmd.Dispose();
                         return statsSchema;
@@ -416,12 +419,71 @@
             return null;
         }
 
+        public bool Trade(string userToken, TradeCardSchema tradeCardSchema)
+        {
+            if (!this.IsLoggedIn(userToken))
+                return false;
+
+            var userCardSchema = this.FetchAllCardsOfSpecificUser("usercards", userToken);
+
+            if (userCardSchema.Count != 0)
+            {
+                foreach (var card in userCardSchema)
+                {
+                    if (card.ID == tradeCardSchema.CardToTrade)
+                    {
+                        var newCard = new CardSchema(tradeCardSchema.ID, card.Name, card.Damage, card.Type);
+
+                        if (this.AddCard(userToken, newCard) && this.DeleteUserCard(userToken, card.ID))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+
         // Finished.
         private static IDbConnection Connect()
         {
             return new NpgsqlConnection("Host=localhost;Username=root;Password=root;Database=MTCG");
         }
 
+
+        private bool AddCard(string userToken, CardSchema cardSchema)
+        {
+            using (IDbConnection connection = Connect())
+            {
+                try
+                {
+                    connection.Open();
+                    IDbCommand cmd = connection.CreateCommand();
+                    cmd.CommandText = "Insert into usercards values(@id, @usertoken, @cardid, @name, @damage, @type)";
+                    cmd.Parameters.Add(new NpgsqlParameter("@id", this.AutoIncrement("usercards")));
+                    cmd.Parameters.Add(new NpgsqlParameter("@usertoken", userToken));
+                    cmd.Parameters.Add(new NpgsqlParameter("@cardid", cardSchema.ID));
+                    cmd.Parameters.Add(new NpgsqlParameter("@name", cardSchema.Name));
+                    cmd.Parameters.Add(new NpgsqlParameter("@damage", cardSchema.Damage));
+                    cmd.Parameters.Add(new NpgsqlParameter("@type", cardSchema.Type));
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+
+                return true;
+            }
+        }
 
         // Finished.
         private bool DeleteUserCard(string userToken, string cardId)
@@ -714,6 +776,7 @@
         // Finished.
         private bool IsUserExist(string userToken)
         {
+            var user = this.FetchSpecificUser(userToken);
             return this.FetchSpecificUser(userToken) != null ? true : false;
         }
 

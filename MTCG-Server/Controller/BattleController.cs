@@ -40,30 +40,31 @@
         private HttpResponse ControlScoreRequest(HttpRequest request)
         {
             var scores = this.DbInstance.FetchScore(request.Token);
-            string message = JsonConvert.SerializeObject(scores, Formatting.Indented);
+            string content = JsonConvert.SerializeObject(scores, Formatting.Indented);
             int code = 0;
+            string message;
             code = ((int)HttpStatusCode.Ok);
 
-            if (message == null)
+            if (content == "null")
             {
-                string content = "Score list is empty";
-
-                message = "{";
-                message += "\n";
-                message += "    \"Content\":";
-                message += $" \"{content}\",";
-                message += "\n";
-                message += "    \"Status\":";
-                message += $" \"{code}\"";
-                message += "\n";
-                message += "}";
+                content = "Score list is empty";
             }
+
+            message = "{";
+            message += "\n";
+            message += "    \"Content\":";
+            message += $" \"{content}\",";
+            message += "\n";
+            message += "    \"Status\":";
+            message += $" \"{code}\"";
+            message += "\n";
+            message += "}";
 
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };
@@ -72,30 +73,30 @@
         private HttpResponse ControlStatsRequest(HttpRequest request)
         {
             var stats = this.DbInstance.FetchUserStats(request.Token);
-            string message = JsonConvert.SerializeObject(stats, Formatting.Indented);
-            int code = 0;
+            string content = JsonConvert.SerializeObject(stats, Formatting.Indented);
+            string message;
+            int code = ((int)HttpStatusCode.Ok);
 
-            if (message == null)
+            if (content == null || content.Contains("[]"))
             {
-                string content = "Stats is empty";
-
-                message = "{";
-                message += "\n";
-                message += "    \"Content\":";
-                message += $" \"{content}\",";
-                message += "\n";
-                message += "    \"Status\":";
-                message += $" \"{code}\"";
-                message += "\n";
-                message += "}";
+                 content = "Stats is empty";
             }
 
-            code = ((int)HttpStatusCode.Ok);
+            message = "{";
+            message += "\n";
+            message += "    \"Content\":";
+            message += $" \"{content}\",";
+            message += "\n";
+            message += "    \"Status\":";
+            message += $" \"{code}\"";
+            message += "\n";
+            message += "}";
+
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };
@@ -106,7 +107,7 @@
             string message = null;
             string content = null;
             UserSchema player = this.DbInstance.FetchSpecificUser(request.Token);
-            player.Token = request.Token;
+            player.BattleToken = request.Token;
             List<CardSchemaWithUserToken> playerCards = this.DbInstance.FetchAllDeckCardsOfSpecificUser(request.Token);
             battleRequest.Add(player, playerCards);
 
@@ -145,8 +146,8 @@
                     Console.WriteLine($"Player B won {battleResult.PlayerBRoundWinningSteak} rounds");
                     Console.WriteLine($"Total draw rounds {battleResult.DrawSteak}");
 
-                    if (AddStats(playerA.Token, battleResult.PlayerAElo, battleResult.PlayerARoundWinningSteak, battleResult.PlayerBRoundWinningSteak, battleResult.DrawSteak, battleResult.WinnerName, battleResult.LooserName, battleResult.Status) &&
-                        (AddStats(playerB.Token, battleResult.PlayerBElo, battleResult.PlayerBRoundWinningSteak, battleResult.PlayerARoundWinningSteak, battleResult.DrawSteak, battleResult.WinnerName, battleResult.LooserName, battleResult.Status)))
+                    if (AddStats(playerA.BattleToken, battleResult.PlayerAElo, battleResult.PlayerARoundWinningSteak, battleResult.PlayerBRoundWinningSteak, battleResult.DrawSteak, battleResult.WinnerName, battleResult.LooserName, battleResult.Status) &&
+                        (AddStats(playerB.BattleToken, battleResult.PlayerBElo, battleResult.PlayerBRoundWinningSteak, battleResult.PlayerARoundWinningSteak, battleResult.DrawSteak, battleResult.WinnerName, battleResult.LooserName, battleResult.Status)))
                     {
                         content = $"Battle is finished and {battleResult.WinnerName} is winner";
                     }
@@ -175,8 +176,8 @@
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };

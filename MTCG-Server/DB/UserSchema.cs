@@ -2,6 +2,7 @@
 {
     public class UserSchema
     {
+        private string token;
         public UserSchema(string name, string password)
         {
             this.Name = name;
@@ -65,6 +66,14 @@
         }
 
         public string Token
+        {
+            get
+            {
+                return $"Basic {this.Name}-mtcgToken";
+            }
+        }
+
+        public string BattleToken
         {
             get;
             set;

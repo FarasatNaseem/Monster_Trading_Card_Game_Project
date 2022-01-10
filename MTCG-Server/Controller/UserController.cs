@@ -79,8 +79,8 @@
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };
@@ -126,8 +126,8 @@
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };
@@ -152,8 +152,8 @@
 
             return new HttpResponse()
             {
-                ReasonPhrase = HttpStatusCode.Ok.ToString(),
-                Status = HttpStatusCode.Ok,
+                ReasonPhrase = ((HttpStatusCode)code).ToString(),
+                Status = (HttpStatusCode)code,
                 ContentAsUTF8 = message,
                 Path = request.Path
             };
